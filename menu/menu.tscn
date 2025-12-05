@@ -1,0 +1,69 @@
+[gd_scene load_steps=4 format=3 uid="uid://1flkrempgla3"]
+
+[ext_resource type="Theme" uid="uid://dntbn2rajpfuj" path="res://menu/button/default discord.tres" id="1_6nwqt"]
+[ext_resource type="Texture2D" uid="uid://d31js0twn45xf" path="res://menu/image/sr2d3a750f819aws3.png" id="1_j0t7f"]
+[ext_resource type="Script" uid="uid://ddfqe5m4y12bt" path="res://menu/discord.gd" id="2_6nwqt"]
+
+[node name="scene" type="Node2D"]
+script = ExtResource("2_6nwqt")
+
+[node name="button" type="Node2D" parent="."]
+position = Vector2(499, 82)
+
+[node name="discord" type="Button" parent="button"]
+z_index = 1
+offset_left = 1298.0
+offset_top = 893.0
+offset_right = 1398.0
+offset_bottom = 980.0
+theme = ExtResource("1_6nwqt")
+flat = true
+
+[node name="LinkButton" type="LinkButton" parent="button/discord"]
+z_index = 10
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.505
+anchor_top = 0.53400004
+anchor_right = 0.505
+anchor_bottom = 0.53400004
+offset_left = -58.5
+offset_top = -53.458004
+offset_right = 58.5
+offset_bottom = 47.541996
+
+[node name="Sr2d3a750f819Aws3" type="Sprite2D" parent="button/discord"]
+position = Vector2(50, 44)
+scale = Vector2(0.082236774, 0.07072366)
+texture = ExtResource("1_j0t7f")
+
+[node name="play" type="Button" parent="button"]
+offset_left = 28.0
+offset_top = 126.0
+offset_right = 846.0
+offset_bottom = 288.0
+
+[node name="load" type="Button" parent="button"]
+offset_left = 28.0
+offset_top = 303.0
+offset_right = 846.0
+offset_bottom = 465.0
+
+[node name="setting" type="Button" parent="button"]
+offset_left = 28.0
+offset_top = 480.0
+offset_right = 846.0
+offset_bottom = 642.0
+
+[node name="credits" type="Button" parent="button"]
+offset_left = 28.0
+offset_top = 657.0
+offset_right = 846.0
+offset_bottom = 819.0
+
+[node name="ColorRect" type="ColorRect" parent="."]
+z_index = -1
+offset_right = 1917.0
+offset_bottom = 1082.0
+
+[connection signal="pressed" from="button/discord/LinkButton" to="." method="_on_link_button_pressed"]

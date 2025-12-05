@@ -1,3 +1,45 @@
-# Godot 4+ specific ignores
-.godot/
-/android/
+# Godot
+.import/
+.export/
+export.cfg
+export_presets.cfg
+
+# Godot-specific temp/cache
+*.translation
+*.pot
+*.retry
+/.godot/
+
+# Python (py4godot)
+addons/py4godot/**/python/
+addons/py4godot/**/cpython-*/
+addons/py4godot/**/__pycache__/
+addons/py4godot/**/.venv/
+addons/py4godot/**/venv/
+addons/py4godot/**/build/
+addons/py4godot/**/dist/
+addons/py4godot/**/.pytest_cache/
+addons/py4godot/**/.mypy_cache/
+addons/py4godot/**/.ruff_cache/
+
+# Generic Python crap
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS trash
+Thumbs.db
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# Backup files
+*~
+*.bak
