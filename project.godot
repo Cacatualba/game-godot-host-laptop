@@ -27,6 +27,10 @@ window/stretch/mode="canvas_items"
 version_control/plugin_name="GitPlugin"
 version_control/autoload_on_startup=true
 
+[global_group]
+
+door_sprite=""
+
 [input]
 
 ui_accept={
