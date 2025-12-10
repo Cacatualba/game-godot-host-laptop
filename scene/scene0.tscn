@@ -1,10 +1,10 @@
 [gd_scene load_steps=13 format=3 uid="uid://bhpgwtkbl378e"]
 
-[ext_resource type="Script" uid="uid://bgb6wnwac4yyr" path="res://personnage/Main Character/charachter_movement_2d.gd" id="1_1neql"]
-[ext_resource type="Texture2D" uid="uid://b1uhyqyd4j05n" path="res://personnage/Main Character/stickman triste.png" id="2_d4yfj"]
-[ext_resource type="Texture2D" uid="uid://bpsgq2tfgcuex" path="res://scene/ground.png" id="3_d4yfj"]
-[ext_resource type="Texture2D" uid="uid://de12c52qwrpw2" path="res://scene/rouge.png" id="5_6vbjn"]
-[ext_resource type="Script" uid="uid://drvlqq6hky5on" path="res://DoorTrigger.gd" id="6_q63la"]
+[ext_resource type="Script" uid="uid://bgb6wnwac4yyr" path="res://personnage/Main Character/mouvement/charachter_movement_2d.gd" id="1_8lk8g"]
+[ext_resource type="Texture2D" uid="uid://b1uhyqyd4j05n" path="res://personnage/Main Character/skin/stickman triste.png" id="2_0h8es"]
+[ext_resource type="Texture2D" uid="uid://bpsgq2tfgcuex" path="res://scene/ground.png" id="3_x144b"]
+[ext_resource type="Script" uid="uid://drvlqq6hky5on" path="res://door 1/DoorTrigger.gd" id="4_56rhf"]
+[ext_resource type="Texture2D" uid="uid://de12c52qwrpw2" path="res://scene/rouge.png" id="5_o0lrt"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_d4yfj"]
 radius = 41.0
@@ -14,7 +14,7 @@ height = 98.0
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_d4yfj")
+"texture": ExtResource("2_0h8es")
 }],
 "loop": true,
 "name": &"default",
@@ -22,7 +22,7 @@ animations = [{
 }]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_d4yfj"]
-texture = ExtResource("3_d4yfj")
+texture = ExtResource("3_x144b")
 0:0/size_in_atlas = Vector2i(9, 5)
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-71.900826, -39.66942, 71.07437, -38.84297, 71.90082, 39.66942, -71.900826, 39.66942)
@@ -35,7 +35,7 @@ sources/1 = SubResource("TileSetAtlasSource_d4yfj")
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("5_6vbjn")
+"texture": ExtResource("5_o0lrt")
 }],
 "loop": true,
 "name": &"close",
@@ -43,11 +43,11 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("3_d4yfj")
+"texture": ExtResource("3_x144b")
 }],
 "loop": true,
 "name": &"open",
-"speed": 3.0
+"speed": 5.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6vbjn"]
@@ -59,16 +59,16 @@ size = Vector2(797, 638)
 [node name="Node2D" type="Node2D"]
 
 [node name="ColorRect" type="ColorRect" parent="."]
-offset_left = -71.0
-offset_top = -96.0
-offset_right = 15896.0
-offset_bottom = 3861.0
+offset_left = -1696.0
+offset_top = -687.0
+offset_right = 15955.0
+offset_bottom = 4058.0
 color = Color(0.8038248, 0.9546848, 0.3687923, 1)
 
-[node name="Player" type="CharacterBody2D" parent="."]
+[node name="Player" type="CharacterBody2D" parent="." groups=["player"]]
 z_index = 12
-position = Vector2(172, 893)
-script = ExtResource("1_1neql")
+position = Vector2(160, 902)
+script = ExtResource("1_8lk8g")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
 z_index = 999
@@ -93,26 +93,32 @@ layer_0/tile_data = PackedInt32Array(4325380, 1, 0, 4325388, 1, 0, 4325394, 1, 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TileMap"]
 
-[node name="Node2D" type="Node2D" parent="." groups=["door_sprite"]]
-position = Vector2(2536, 1002)
-script = ExtResource("6_q63la")
-
-[node name="door" type="AnimatedSprite2D" parent="Node2D"]
-position = Vector2(114.39746, -31)
-rotation = 3.1415927
+[node name="Node2D" type="Node2D" parent="."]
+position = Vector2(2650.3975, 971)
+rotation = -3.1415925
 scale = Vector2(1.4168602, 6.662259)
+script = ExtResource("4_56rhf")
+
+[node name="Door" type="AnimatedSprite2D" parent="Node2D"]
+scale = Vector2(0.9999998, 1)
 sprite_frames = SubResource("SpriteFrames_d4yfj")
-animation = &"close"
+animation = &"open"
 
-[node name="collision" type="CollisionShape2D" parent="Node2D"]
-position = Vector2(115, -4.5)
+[node name="StaticBody2D" type="StaticBody2D" parent="Node2D"]
+position = Vector2(1870.613, 145.74632)
+rotation = 3.1415927
+scale = Vector2(0.7057859, 0.15009923)
+
+[node name="Collision" type="CollisionShape2D" parent="Node2D/StaticBody2D"]
+position = Vector2(2651.0005, 997.5)
+scale = Vector2(0.9999999, 1)
 shape = SubResource("RectangleShape2D_6vbjn")
-disabled = true
 
-[node name="trigger_area" type="Area2D" parent="Node2D"]
-position = Vector2(-2536, -1002)
+[node name="Trigger_Area" type="Area2D" parent="Node2D"]
+position = Vector2(1870.6127, 145.74632)
+rotation = 3.1415927
+scale = Vector2(0.70578575, 0.15009923)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Node2D/trigger_area"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Node2D/Trigger_Area"]
 position = Vector2(3351, 886)
 shape = SubResource("RectangleShape2D_vso1m")
-disabled = true

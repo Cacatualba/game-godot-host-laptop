@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="game rogue like"
-run/main_scene="uid://bhpgwtkbl378e"
+run/main_scene="uid://c313w5sh6ft6y"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -26,10 +26,6 @@ window/stretch/mode="canvas_items"
 
 version_control/plugin_name="GitPlugin"
 version_control/autoload_on_startup=true
-
-[global_group]
-
-door_sprite=""
 
 [input]
 
