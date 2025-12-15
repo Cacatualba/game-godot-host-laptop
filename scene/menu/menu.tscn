@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c313w5sh6ft6y"]
 
-[ext_resource type="Script" uid="uid://2ewm8nk28nic" path="res://menu.gd" id="1_lti8b"]
+[ext_resource type="Script" uid="uid://2ewm8nk28nic" path="res://scene/menu/menu.gd" id="1_ny6dg"]
 
 [node name="Menu" type="Control"]
 layout_mode = 3
@@ -14,7 +14,7 @@ offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(1, 0.97023755)
-script = ExtResource("1_lti8b")
+script = ExtResource("1_ny6dg")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 0
@@ -31,10 +31,10 @@ anchor_left = 0.5
 anchor_top = 0.252
 anchor_right = 0.5
 anchor_bottom = 0.252
-offset_left = -888.0
-offset_top = 66.93222
-offset_right = -104.0
-offset_bottom = 793.5582
+offset_left = -348.99994
+offset_top = 114.34329
+offset_right = -64.21069
+offset_bottom = 218.42606
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(2.3455944, 2.7429814)

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://de12c52qwrpw2"
-path="res://.godot/imported/rouge.png-2c9c63102e26c0bbf18198ffb3df26ee.ctex"
+uid="uid://8cjssyr0x0rl"
+path="res://.godot/imported/damaging ennemy.png-033e35a4061ee7f50e9983474d9daa50.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://scene/rouge.png"
-dest_files=["res://.godot/imported/rouge.png-2c9c63102e26c0bbf18198ffb3df26ee.ctex"]
+source_file="res://personnage/ennemy 1/damaging ennemy.png"
+dest_files=["res://.godot/imported/damaging ennemy.png-033e35a4061ee7f50e9983474d9daa50.ctex"]
 
 [params]
 

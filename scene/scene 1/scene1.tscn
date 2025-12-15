@@ -1,14 +1,15 @@
-[gd_scene load_steps=13 format=3 uid="uid://bhpgwtkbl378e"]
+[gd_scene load_steps=14 format=3 uid="uid://bhpgwtkbl378e"]
 
 [ext_resource type="Script" uid="uid://bgb6wnwac4yyr" path="res://personnage/Main Character/mouvement/charachter_movement_2d.gd" id="1_8lk8g"]
 [ext_resource type="Texture2D" uid="uid://b1uhyqyd4j05n" path="res://personnage/Main Character/skin/stickman triste.png" id="2_0h8es"]
-[ext_resource type="Texture2D" uid="uid://bpsgq2tfgcuex" path="res://scene/ground.png" id="3_x144b"]
+[ext_resource type="Texture2D" uid="uid://bpsgq2tfgcuex" path="res://scene/scene 1/ground.png" id="3_x144b"]
 [ext_resource type="Script" uid="uid://drvlqq6hky5on" path="res://door 1/DoorTrigger.gd" id="4_56rhf"]
-[ext_resource type="Texture2D" uid="uid://de12c52qwrpw2" path="res://scene/rouge.png" id="5_o0lrt"]
+[ext_resource type="Texture2D" uid="uid://de12c52qwrpw2" path="res://scene/scene 1/rouge.png" id="5_o0lrt"]
+[ext_resource type="PackedScene" uid="uid://d2h32ogy2urip" path="res://personnage/ennemy_1.tscn" id="6_0h8es"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_d4yfj"]
 radius = 41.0
-height = 98.0
+height = 126.0
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_vso1m"]
 animations = [{
@@ -67,12 +68,12 @@ color = Color(0.8038248, 0.9546848, 0.3687923, 1)
 
 [node name="Player" type="CharacterBody2D" parent="." groups=["player"]]
 z_index = 12
-position = Vector2(160, 902)
+position = Vector2(166, 898)
 script = ExtResource("1_8lk8g")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
 z_index = 999
-position = Vector2(-95, 24)
+position = Vector2(-92, 36)
 shape = SubResource("CapsuleShape2D_d4yfj")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Player"]
@@ -122,3 +123,6 @@ scale = Vector2(0.70578575, 0.15009923)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Node2D/Trigger_Area"]
 position = Vector2(3351, 886)
 shape = SubResource("RectangleShape2D_vso1m")
+
+[node name="Ennemy1" parent="." instance=ExtResource("6_0h8es")]
+position = Vector2(454, 773)

@@ -2,7 +2,7 @@ extends CharacterBody2D
 
 @export var speed := 400.0
 @export var jump_force := 900.0
-@export var gravity := 1800.0
+@export var gravity := 2000.0
 
 func _physics_process(delta):
 	var direction = 0
