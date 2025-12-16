@@ -1,6 +1,6 @@
 [gd_scene load_steps=14 format=3 uid="uid://bhpgwtkbl378e"]
 
-[ext_resource type="Script" uid="uid://bgb6wnwac4yyr" path="res://personnage/Main Character/mouvement/charachter_movement_2d.gd" id="1_8lk8g"]
+[ext_resource type="Script" uid="uid://bgb6wnwac4yyr" path="res://personnage/Main Character/mouvement/Player.gd" id="1_8lk8g"]
 [ext_resource type="Texture2D" uid="uid://b1uhyqyd4j05n" path="res://personnage/Main Character/skin/stickman triste.png" id="2_0h8es"]
 [ext_resource type="Texture2D" uid="uid://bpsgq2tfgcuex" path="res://scene/scene 1/ground.png" id="3_x144b"]
 [ext_resource type="Script" uid="uid://drvlqq6hky5on" path="res://door 1/DoorTrigger.gd" id="4_56rhf"]
@@ -125,4 +125,4 @@ position = Vector2(3351, 886)
 shape = SubResource("RectangleShape2D_vso1m")
 
 [node name="Ennemy1" parent="." instance=ExtResource("6_0h8es")]
-position = Vector2(454, 773)
+position = Vector2(962, 968)

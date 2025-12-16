@@ -1,7 +1,7 @@
 extends Node
 var GameStarted: bool
 
-var PlayerBody: CharacterBody2D
+var PlayerBody: CharacterBody2D 
 var PlayerWeaponEquip: bool
 
 var PlayerAlive: bool

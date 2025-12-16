@@ -3,6 +3,14 @@ extends CharacterBody2D
 @export var speed := 400.0
 @export var jump_force := 900.0
 @export var gravity := 2000.0
+var Global 
+
+#func _ready():
+	#Global.playerBody = self
+	#current_attack = false
+	#dead = false 
+	#can_take_damage = true
+	#Global.playerAlive = true
 
 func _physics_process(delta):
 	var direction = 0
