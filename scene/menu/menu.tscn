@@ -25,9 +25,9 @@ anchor_top = 0.252
 anchor_right = 0.5
 anchor_bottom = 0.252
 offset_left = -874.00006
-offset_top = 73.11627
+offset_top = 68.65765
 offset_right = -589.2108
-offset_bottom = 177.19904
+offset_bottom = 225.84366
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(2.3455944, 2.7429814)
@@ -39,6 +39,10 @@ text = "Start"
 [node name="OptionsButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 text = "Options"
+
+[node name="Credits" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Credits"
 
 [node name="Quit Button" type="Button" parent="VBoxContainer"]
 layout_mode = 2
@@ -53,4 +57,5 @@ texture = ExtResource("2_wwfty")
 
 [connection signal="pressed" from="VBoxContainer/StartButton" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="VBoxContainer/OptionsButton" to="." method="_on_options_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/Credits" to="." method="_on_credits_pressed"]
 [connection signal="pressed" from="VBoxContainer/Quit Button" to="." method="_on_quit_button_pressed"]

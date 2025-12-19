@@ -50,11 +50,11 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_jw0h5"]
-size = Vector2(74, 62)
+[sub_resource type="CircleShape2D" id="CircleShape2D_3xs8o"]
+radius = 40.011414
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3xs8o"]
-size = Vector2(1309, 565)
+size = Vector2(1685, 565)
 
 [node name="Ennemy1" type="CharacterBody2D"]
 script = ExtResource("1_jw0h5")
@@ -66,20 +66,21 @@ sprite_frames = SubResource("SpriteFrames_e6ir7")
 animation = &"deal_damage"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(50, 18)
-shape = SubResource("RectangleShape2D_jw0h5")
+position = Vector2(50, 8)
+scale = Vector2(1, 1.0464299)
+shape = SubResource("CircleShape2D_3xs8o")
 
 [node name="DirectionTimer" type="Timer" parent="."]
 autostart = true
 
-[node name="DetectionArea" type="Area2D" parent="."]
+[node name="detection_area" type="Area2D" parent="."]
 position = Vector2(50, 17)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea"]
-position = Vector2(-1, 1)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="detection_area"]
+position = Vector2(0.5, 1)
 shape = SubResource("RectangleShape2D_3xs8o")
-disabled = true
+debug_color = Color(0.39215687, 1, 1, 0.41960785)
 
 [connection signal="timeout" from="DirectionTimer" to="." method="_on_direction_timer_timeout"]
-[connection signal="body_entered" from="DetectionArea" to="." method="_on_detection_area_body_entered"]
-[connection signal="body_exited" from="DetectionArea" to="." method="_on_detection_area_body_exited"]
+[connection signal="body_entered" from="detection_area" to="." method="_on_detection_area_body_entered"]
+[connection signal="body_exited" from="detection_area" to="." method="_on_detection_area_body_exited"]

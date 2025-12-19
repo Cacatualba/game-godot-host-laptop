@@ -68,7 +68,7 @@ color = Color(0.8038248, 0.9546848, 0.3687923, 1)
 
 [node name="Player" type="CharacterBody2D" parent="." groups=["player"]]
 z_index = 12
-position = Vector2(166, 898)
+position = Vector2(165, 919)
 script = ExtResource("1_8lk8g")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
@@ -125,4 +125,4 @@ position = Vector2(3351, 886)
 shape = SubResource("RectangleShape2D_vso1m")
 
 [node name="Ennemy1" parent="." instance=ExtResource("6_0h8es")]
-position = Vector2(962, 968)
+position = Vector2(892, 975)

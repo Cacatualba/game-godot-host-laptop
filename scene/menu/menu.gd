@@ -18,3 +18,8 @@ func _on_options_button_pressed():
 
 func _on_quit_button_pressed():
 	get_tree().quit()
+
+func _on_credits_pressed():
+	print("option button work")
+	get_tree().change_scene_to_file("res://scene/Credits/Credits.tscn")
+	print("option button work2")
