@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://mjcqohxkel2o"]
+[gd_scene load_steps=3 format=3 uid="uid://dvidr4rfnam6u"]
 
-[ext_resource type="Script" uid="uid://brbqq6evpvoat" path="res://scene/Option/option.gd" id="1_l7kxv"]
-[ext_resource type="Texture2D" uid="uid://ben3r71wh5igy" path="res://scene/Option/chad_cat().jpg" id="1_x78od"]
+[ext_resource type="Texture2D" uid="uid://ben3r71wh5igy" path="res://scene/Option/chad_cat().jpg" id="1_51fom"]
+[ext_resource type="Script" uid="uid://c1ocq16qy42ty" path="res://scene/Option_In_Game_Folder/Option in game.gd" id="1_t64xy"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -10,12 +10,12 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_l7kxv")
+script = ExtResource("1_t64xy")
 
 [node name="ChadCat()" type="Sprite2D" parent="."]
 position = Vector2(961.5, 541.50006)
 scale = Vector2(6.383333, 6.3630958)
-texture = ExtResource("1_x78od")
+texture = ExtResource("1_51fom")
 
 [node name="quit1" type="VBoxContainer" parent="."]
 layout_mode = 0
@@ -24,7 +24,7 @@ offset_top = 520.0
 offset_right = 1513.0
 offset_bottom = 641.0
 
-[node name="quit2" type="Button" parent="quit1"]
+[node name="ReturnButton" type="Button" parent="quit1"]
 layout_mode = 2
 text = "Quit"
 
@@ -47,4 +47,4 @@ layout_mode = 2
 [node name="Button4" type="Button" parent="Option"]
 layout_mode = 2
 
-[connection signal="pressed" from="quit1/quit2" to="." method="_on_quit_2_pressed"]
+[connection signal="pressed" from="quit1/ReturnButton" to="." method="_on_return_button_pressed"]

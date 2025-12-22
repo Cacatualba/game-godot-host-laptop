@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://d2h32ogy2urip"]
 
-[ext_resource type="Script" uid="uid://drjiy5gwqucjf" path="res://personnage/ennemy_1.gd" id="1_jw0h5"]
+[ext_resource type="Script" uid="uid://drjiy5gwqucjf" path="res://personnage/ennemy 1/ennemy_1.gd" id="1_jw0h5"]
 [ext_resource type="Texture2D" uid="uid://8cjssyr0x0rl" path="res://personnage/ennemy 1/damaging ennemy.png" id="2_ogv5h"]
 [ext_resource type="Texture2D" uid="uid://dokf6mvxv573b" path="res://personnage/ennemy 1/dead ennemy.png" id="3_fjx0m"]
 [ext_resource type="Texture2D" uid="uid://8h14rw4w1lei" path="res://personnage/ennemy 1/hurt ennemy.png" id="4_shsno"]
