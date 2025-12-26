@@ -9,4 +9,4 @@ func _ready():
 		$ReturnButton.pressed.connect(_on_return_button_pressed)
 
 func _on_return_button_pressed():
-	get_tree().change_scene_to_file("res://scene/MainScene.tscn")
+	get_tree().change_scene_to_file("res://scene/scene 1/scene1.tscn")
