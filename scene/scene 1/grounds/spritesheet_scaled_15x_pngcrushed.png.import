@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bpsgq2tfgcuex"
-path="res://.godot/imported/ground.png-57e57446596614686a44131991bbfd6b.ctex"
+uid="uid://bqi01micaacax"
+path="res://.godot/imported/spritesheet_scaled_15x_pngcrushed.png-8a823dfc789684345501d74dbddf3ef5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://scene/scene 1/ground.png"
-dest_files=["res://.godot/imported/ground.png-57e57446596614686a44131991bbfd6b.ctex"]
+source_file="res://scene/scene 1/grounds/spritesheet_scaled_15x_pngcrushed.png"
+dest_files=["res://.godot/imported/spritesheet_scaled_15x_pngcrushed.png-8a823dfc789684345501d74dbddf3ef5.ctex"]
 
 [params]
 
