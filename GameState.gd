@@ -1,76 +1,118 @@
 extends Node
 
-var save_path = "user://variable.save"
+const SAVE_PATH = "user://variable.save"
+
 var player: Node2D
-var saved_player_position: Vector2 = Vector2.ZERO
-var has_saved_position: bool = false
-var slime: Node2D
-var saved_slime_position: Vector2 = Vector2.ZERO
-var slime_has_saved_position: bool = false
+var slime: Node2D  # ← En minuscule (convention Godot)
+
+var saved_data := {
+	"player_position": Vector2.ZERO,
+	"player_exists": false,
+}
+
+# Positions de spawn par défaut des ennemis
+const ENEMY_DEFAULT_SPAWNS = {
+	"Slime": Vector2(3495, 2089),
+	# "Ennemy2": Vector2(1500, 800),
+	# "Ennemy3": Vector2(2000, 600),
+}
 
 func _ready():
 	load_data()
+	spawn_enemies_at_default_positions()
+	setup_entities()
+
+func spawn_enemies_at_default_positions():
+	print("=== SPAWNING ENEMIES ===")
+	for enemy_name in ENEMY_DEFAULT_SPAWNS.keys():
+		var enemy_pos = ENEMY_DEFAULT_SPAWNS[enemy_name]
+		
+		var enemy = get_node_or_null(enemy_name)
+		if enemy == null:
+			push_warning("Enemy '", enemy_name, "' not found in scene - skipping")
+			continue
+		
+		# Vérifier si on a une position sauvegardée pour cet ennemi
+		var saved_key = enemy_name.to_lower() + "_position"
+		if saved_data.has(saved_key):
+			enemy.global_position = saved_data[saved_key]
+			print("✅ Spawned ", enemy_name, " at SAVED position: ", saved_data[saved_key])
+		else:
+			enemy.global_position = enemy_pos
+			print("✅ Spawned ", enemy_name, " at DEFAULT position: ", enemy_pos)
 	
-	if has_node("Ennemy1"):
-		slime = $Ennemy1
-	else:
-		push_error("Slime not found!")
-		
-	if slime != null and slime_has_saved_position:
-		slime.global_position = saved_slime_position
-		
-	if has_node("Player"):
-		player = $Player
-	else:
+	print("========================")
+
+func setup_entities():
+	# Setup Player
+	player = get_node_or_null("Player")
+	if player == null:
 		push_error("Player node not found!")
 		return
 	
-	# Si on a une position sauvegardée, respawn le joueur
-	if has_saved_position:
-		player.global_position = saved_player_position
+	if saved_data.has("player_position") and saved_data.player_exists:
+		player.global_position = saved_data.player_position
+		print("✅ Player spawned at SAVED position: ", saved_data.player_position)
+	else:
+		print("✅ Player at default position: ", player.global_position)
+	
+	# Cache Slime reference
+	slime = get_node_or_null("Slime")
 
 func _physics_process(_delta):
 	if Input.is_action_just_pressed("Option_In_Game") and player != null:
-		# Sauvegarde la position avant de passer à Options
-		saved_player_position = player.global_position
-		has_saved_position = true
-		
-		# Sauvegarder la position du slime seulement s'il existe
-		if slime != null:
-			saved_slime_position = slime.global_position
-			slime_has_saved_position = true
-		
-		save()  # Sauvegarde avant de changer de scène
-		get_tree().change_scene_to_file("res://scene/Option_In_Game_Folder/Option_In_Game.tscn")
+		save_and_transition()
+
+func save_and_transition():
+	save_all_positions()
+	save()
+	get_tree().change_scene_to_file("res://scene/Option_In_Game_Folder/Option_In_Game.tscn")
+
+func save_all_positions():
+	# Save player
+	saved_data.player_position = player.global_position
+	saved_data.player_exists = true
+	
+	# Save ALL enemies
+	print("💾 Saving all entity positions...")
+	for enemy_name in ENEMY_DEFAULT_SPAWNS.keys():
+		var enemy = get_node_or_null(enemy_name)
+		if enemy != null:
+			var key = enemy_name.to_lower() + "_position"
+			saved_data[key] = enemy.global_position
+			print("  - ", enemy_name, ": ", enemy.global_position)
 
 func save():
-	var file = FileAccess.open(save_path, FileAccess.WRITE)
-	file.store_var(saved_player_position)
-	file.store_var(has_saved_position)
-	file.store_var(saved_slime_position)
-	file.store_var(slime_has_saved_position)
+	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if file == null:
+		push_error("Failed to save data!")
+		return
+	
+	file.store_var(saved_data)
 	file.close()
+	print("✅ Data saved successfully!")
 
 func load_data():
-	if FileAccess.file_exists(save_path):
-		var file = FileAccess.open(save_path, FileAccess.READ)
-		
-		# Lire les données du joueur (toujours présentes)
-		saved_player_position = file.get_var()
-		has_saved_position = file.get_var()
-		
-		# Vérifier s'il y a plus de données (nouveau format)
-		if file.get_position() < file.get_length():
-			saved_slime_position = file.get_var()
-			slime_has_saved_position = file.get_var()
-		else:
-			# Ancien format - pas de données pour le slime
-			saved_slime_position = Vector2.ZERO
-			slime_has_saved_position = false
-			print("Old save format detected - slime data not found")
-		
-		file.close()
+	if !FileAccess.file_exists(SAVE_PATH):
+		print("No save file found - starting fresh")
+		return
+	
+	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if file == null:
+		push_error("Failed to load save data!")
+		return
+	
+	var loaded_data = file.get_var()
+	file.close()
+	
+	if loaded_data is Dictionary:
+		saved_data.merge(loaded_data)  # ← Merge au lieu de remplacer
+		print("✅ Save data loaded successfully!")
 	else:
-		print("no data saved")
-		has_saved_position = false
-		slime_has_saved_position = false
+		migrate_old_format(loaded_data)
+
+func migrate_old_format(first_var):
+	print("⚠️ Migrating old save format...")
+	saved_data.player_position = first_var
+	saved_data.player_exists = true
+	save()

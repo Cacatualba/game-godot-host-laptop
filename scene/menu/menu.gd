@@ -10,6 +10,7 @@ func _on_start_button_pressed():
 	print("BUTTON WORKS1")
 	get_tree().change_scene_to_file("res://scene/scene 1/scene1.tscn")
 	print("BUTTON WORK2S")
+	
 
 func _on_options_button_pressed():
 	print("option button work")
