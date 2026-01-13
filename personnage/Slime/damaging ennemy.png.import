@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://fiysaql0a0nc"
-path="res://.godot/imported/idle ennemy.png-7fc1df079a1407112adeb3b170433999.ctex"
+uid="uid://8cjssyr0x0rl"
+path="res://.godot/imported/damaging ennemy.png-66225374388414e103a497893181506c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://personnage/ennemy 1/idle ennemy.png"
-dest_files=["res://.godot/imported/idle ennemy.png-7fc1df079a1407112adeb3b170433999.ctex"]
+source_file="res://personnage/Slime/damaging ennemy.png"
+dest_files=["res://.godot/imported/damaging ennemy.png-66225374388414e103a497893181506c.ctex"]
 
 [params]
 

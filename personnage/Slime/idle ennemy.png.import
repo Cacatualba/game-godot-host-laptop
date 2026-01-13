@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gbxk5uympp5g"
-path="res://.godot/imported/walk ennemy.png-3e0a3c6222262dd26453f32bc2a814ff.ctex"
+uid="uid://fiysaql0a0nc"
+path="res://.godot/imported/idle ennemy.png-3959c813328b4472f773175ce28fc590.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://personnage/ennemy 1/walk ennemy.png"
-dest_files=["res://.godot/imported/walk ennemy.png-3e0a3c6222262dd26453f32bc2a814ff.ctex"]
+source_file="res://personnage/Slime/idle ennemy.png"
+dest_files=["res://.godot/imported/idle ennemy.png-3959c813328b4472f773175ce28fc590.ctex"]
 
 [params]
 

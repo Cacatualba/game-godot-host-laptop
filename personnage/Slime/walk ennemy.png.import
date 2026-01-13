@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dokf6mvxv573b"
-path="res://.godot/imported/dead ennemy.png-d500252c0b6dfd4c225accbe6e288d29.ctex"
+uid="uid://gbxk5uympp5g"
+path="res://.godot/imported/walk ennemy.png-3ba7b4b3eee19db0383f2592dfae67e4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://personnage/ennemy 1/dead ennemy.png"
-dest_files=["res://.godot/imported/dead ennemy.png-d500252c0b6dfd4c225accbe6e288d29.ctex"]
+source_file="res://personnage/Slime/walk ennemy.png"
+dest_files=["res://.godot/imported/walk ennemy.png-3ba7b4b3eee19db0383f2592dfae67e4.ctex"]
 
 [params]
 

@@ -12,7 +12,7 @@ var saved_data := {
 
 # Positions de spawn par défaut des ennemis
 const ENEMY_DEFAULT_SPAWNS = {
-	"Slime": Vector2(3495, 2089),
+	"Slime": Vector2( 3745.0, 2125.0),
 	# "Ennemy2": Vector2(1500, 800),
 	# "Ennemy3": Vector2(2000, 600),
 }
@@ -40,9 +40,18 @@ func spawn_enemies_at_default_positions():
 		else:
 			enemy.global_position = enemy_pos
 			print("✅ Spawned ", enemy_name, " at DEFAULT position: ", enemy_pos)
+		
+		# ← AJOUTE CES LIGNES DE DEBUG
+		print("  📍 Enemy actual position: ", enemy.global_position)
+		print("  👁️ Enemy visible: ", enemy.visible)
+		print("  📦 Enemy Z-index: ", enemy.z_index)
+		print("  🎨 Enemy modulate: ", enemy.modulate)
+		if enemy.has_node("AnimatedSprite2D"):
+			var sprite = enemy.get_node("AnimatedSprite2D")
+			print("  🖼️ Sprite visible: ", sprite.visible)
+			print("  🎬 Sprite playing: ", sprite.is_playing())
 	
 	print("========================")
-
 func setup_entities():
 	# Setup Player
 	player = get_node_or_null("Player")
