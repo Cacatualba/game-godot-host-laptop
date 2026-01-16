@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://d2h32ogy2urip"]
+[gd_scene load_steps=12 format=3 uid="uid://d2h32ogy2urip"]
 
 [ext_resource type="Script" uid="uid://drjiy5gwqucjf" path="res://personnage/Slime/Slime.gd" id="1_jw0h5"]
 [ext_resource type="Texture2D" uid="uid://8cjssyr0x0rl" path="res://personnage/Slime/damaging ennemy.png" id="2_ogv5h"]
@@ -84,6 +84,9 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_3xs8o"]
 radius = 40.011414
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_x2ujq"]
+radius = 45.0
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3xs8o"]
 size = Vector2(1685, 565)
 
@@ -104,9 +107,14 @@ shape = SubResource("CircleShape2D_3xs8o")
 [node name="DirectionTimer" type="Timer" parent="."]
 autostart = true
 
+[node name="DamageArea2D" type="Area2D" parent="."]
+
+[node name="DamageCollision" type="CollisionShape2D" parent="DamageArea2D"]
+shape = SubResource("CircleShape2D_x2ujq")
+
 [node name="detection_area" type="Area2D" parent="."]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="detection_area"]
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="detection_area"]
 shape = SubResource("RectangleShape2D_3xs8o")
 debug_color = Color(0.39215687, 1, 1, 0.41960785)
 

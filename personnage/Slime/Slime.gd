@@ -1,210 +1,277 @@
 extends CharacterBody2D
 class_name Ennemy1
 
-# Constants
-const SPEED = 100
-const GRAVITY = 300
-const KNOCKBACK_FORCE = 300
+# ================= CONSTANTS =================
+const SPEED := 100.0
+const GRAVITY := 300.0
+const KNOCKBACK_FORCE := 300.0
+const EDGE_CHECK_DISTANCE := 20.0
+const EDGE_CHECK_DROP := 30.0
 
-# Health
-@export var health: int = 80
-@export var health_max: int = 80
-var dead: bool = false
-var taking_damage: bool = false
+const HIT_STUN_TIME := 0.2
+const DAMAGE_COOLDOWN := 1.0
+const DEATH_DURATION := 1.0
 
-# Combat
-@export var damage_to_deal: int = 20
-@export var damage_cooldown: float = 1.0  # Time between damage ticks
-var last_damage_time: float = 0.0
+# ================= STATE =================
+@export var health := 80
+@export var damage := 1
 
-# Movement
-var is_chasing: bool = false
-var dir: Vector2 = Vector2.RIGHT
+var is_dead := false
+var is_chasing := false
+var is_hit_stunned := false
+var direction := Vector2.RIGHT
 
-# References
+# Track which players are currently in contact (for continuous damage)
+var players_in_contact: Dictionary = {}  # player -> last_damage_time
+
+# ================= REFERENCES =================
 var player: CharacterBody2D
-@onready var detection_area: Area2D = $detection_area
-@onready var damage_area: Area2D = $damage_area
-@onready var direction_timer: Timer = $DirectionTimer
-@onready var anim_sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var detection_area: Area2D = get_node_or_null("DetectionArea2D") if has_node("DetectionArea2D") else get_node_or_null("detection_area")
+@onready var damage_area: Area2D = get_node_or_null("DamageArea2D") if has_node("DamageArea2D") else get_node_or_null("damage_area")
+@onready var sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") if has_node("AnimatedSprite2D") else get_node_or_null("Sprite2D")
+@onready var dir_timer: Timer = get_node_or_null("DirectionTimer") if has_node("DirectionTimer") else get_node_or_null("Timer")
 
-func _ready():
-	rotation_degrees = 0
-	setup_damage_area()
-	connect_signals()
-	initialize_enemy()
-
-func initialize_enemy():
-	if anim_sprite:
-		anim_sprite.play("walk")
+# ================= READY =================
+func _ready() -> void:
+	add_to_group("enemies")
 	
-	dir = Vector2.RIGHT if randf() > 0.5 else Vector2.LEFT
-	direction_timer.start()
+	# Play walk animation if sprite exists
+	if sprite:
+		sprite.play("walk")
 
-func setup_damage_area():
-	# Create damage area if it doesn't exist
-	if !damage_area:
-		damage_area = Area2D.new()
-		damage_area.name = "damage_area"
-		damage_area.collision_layer = 0  # Don't collide with anything
-		damage_area.collision_mask = 2  # Only detect player layer (adjust if needed)
-		add_child(damage_area)
-		
-		var collision = CollisionShape2D.new()
-		var shape = CircleShape2D.new()
-		shape.radius = 25  # Circular area covering the slime
-		collision.shape = shape
-		collision.position = Vector2.ZERO  # Centered on the slime
-		damage_area.add_child(collision)
+	direction = Vector2.RIGHT if randf() > 0.5 else Vector2.LEFT
+	
+	# Start direction timer if it exists
+	if dir_timer:
+		dir_timer.start()
+		# Connect timer signal only if not already connected
+		if not dir_timer.timeout.is_connected(_on_direction_timer_timeout):
+			dir_timer.timeout.connect(_on_direction_timer_timeout)
+	else:
+		push_warning("Ennemy1: No direction timer found. Random direction changes disabled.")
 
-func connect_signals():
+	# Connect signals only if nodes exist and not already connected
 	if detection_area:
-		detection_area.body_entered.connect(_on_detection_area_body_entered)
-		detection_area.body_exited.connect(_on_detection_area_body_exited)
+		if not detection_area.body_entered.is_connected(_on_player_detected):
+			detection_area.body_entered.connect(_on_player_detected)
+		if not detection_area.body_exited.is_connected(_on_player_lost):
+			detection_area.body_exited.connect(_on_player_lost)
+	else:
+		push_warning("Ennemy1: No detection_area found. Player detection disabled.")
 	
 	if damage_area:
-		damage_area.body_entered.connect(_on_damage_area_body_entered)
-	
-	if direction_timer:
-		direction_timer.timeout.connect(_on_direction_timer_timeout)
+		if not damage_area.body_entered.is_connected(_on_player_entered_damage_zone):
+			damage_area.body_entered.connect(_on_player_entered_damage_zone)
+		if not damage_area.body_exited.is_connected(_on_player_exited_damage_zone):
+			damage_area.body_exited.connect(_on_player_exited_damage_zone)
+	else:
+		push_warning("Ennemy1: No damage_area found. Damage system disabled.")
 
-func _physics_process(delta):
+# ================= PHYSICS =================
+func _physics_process(delta: float) -> void:
 	rotation = 0
-	
-	find_player()
-	apply_gravity(delta)
-	
-	if is_on_floor() and !is_chasing:
-		check_edge()
-	
-	check_player_contact()
-	move()
-	update_sprite_direction()
-	move_and_slide()
 
-func apply_gravity(delta):
-	if !is_on_floor():
+	# Apply gravity
+	if not is_on_floor():
 		velocity.y += GRAVITY * delta
 
-func check_edge():
-	var space_state = get_world_2d().direct_space_state
-	var check_pos = position + Vector2(dir.x * 20, 0)
-	
-	var query = PhysicsRayQueryParameters2D.create(
-		check_pos,
-		check_pos + Vector2(0, 30)
-	)
-	query.exclude = [self]
-	
-	var result = space_state.intersect_ray(query)
-	
-	if result.is_empty():
-		dir = -dir
+	# Handle death state
+	if is_dead:
 		velocity.x = 0
-
-func check_player_contact():
-	if !damage_area or !player or dead:
+		move_and_slide()
 		return
-	
-	var overlapping_bodies = damage_area.get_overlapping_bodies()
-	for body in overlapping_bodies:
-		if body.is_in_group("player"):
-			apply_damage_to_player(body)
-			return
 
-func find_player():
-	if !player:
-		var players = get_tree().get_nodes_in_group("player")
-		if players.size() > 0:
-			player = players[0]
-
-func move():
-	if dead:
+	# Handle hit stun
+	if is_hit_stunned:
 		velocity.x = 0
+		move_and_slide()
 		return
-	
-	if is_chasing and player and !taking_damage:
-		var direction = (player.position - position).normalized()
+
+	# Movement logic
+	if is_chasing and is_instance_valid(player):
+		var dir: float = sign(player.global_position.x - global_position.x)
+		velocity.x = dir * SPEED
+		direction.x = dir
+	else:
 		velocity.x = direction.x * SPEED
-		dir.x = sign(direction.x) if direction.x != 0 else dir.x
-	else:
-		velocity.x = dir.x * SPEED
+		check_edge()
 
-func update_sprite_direction():
-	if anim_sprite and velocity.x != 0:
-		anim_sprite.flip_h = velocity.x < 0
-
-func _process(_delta):
-	if !anim_sprite or dead:
-		return
+	# Update sprite direction
+	if sprite and velocity.x != 0:
+		sprite.flip_h = velocity.x < 0
 	
-	if taking_damage:
-		anim_sprite.play("hurt")
-	else:
-		anim_sprite.play("walk")
+	# Process continuous damage for all players in contact
+	process_continuous_damage()
+	
+	move_and_slide()
 
-func _on_detection_area_body_entered(body):
+# ================= EDGE CHECK =================
+func check_edge() -> void:
+	if not is_on_floor():
+		return
+
+	var space := get_world_2d().direct_space_state
+	var start := global_position + Vector2(direction.x * EDGE_CHECK_DISTANCE, 0)
+	var end := start + Vector2(0, EDGE_CHECK_DROP)
+
+	var query := PhysicsRayQueryParameters2D.create(start, end)
+	query.exclude = [self]
+	query.collision_mask = 1
+
+	if space.intersect_ray(query).is_empty():
+		direction = -direction
+		velocity.x = 0
+
+# ================= DETECTION =================
+func _on_player_detected(body: Node2D) -> void:
 	if body.is_in_group("player"):
+		player = body
 		is_chasing = true
 
-func _on_detection_area_body_exited(body):
-	if body.is_in_group("player"):
+func _on_player_lost(body: Node2D) -> void:
+	if body == player:
 		is_chasing = false
+		player = null
 
-func _on_damage_area_body_entered(body):
-	if body.is_in_group("player") and !dead:
-		apply_damage_to_player(body)
+# Backward compatibility for scene connections
+func _on_detection_area_body_entered(body: Node2D) -> void:
+	_on_player_detected(body)
 
-func apply_damage_to_player(player_body):
-	if dead:
+func _on_detection_area_body_exited(body: Node2D) -> void:
+	_on_player_lost(body)
+
+func _on_direction_timer_timeout() -> void:
+	if not is_chasing:
+		direction.x = 1.0 if randf() > 0.5 else -1.0
+
+# ================= UNIFIED DAMAGE SYSTEM =================
+func _on_player_entered_damage_zone(body: Node2D) -> void:
+	"""Player entered damage area - register them and deal immediate damage"""
+	if not body.is_in_group("player") or is_dead or is_hit_stunned:
 		return
 	
-	# Check cooldown
-	var current_time = Time.get_ticks_msec() / 1000.0
-	if current_time - last_damage_time < damage_cooldown:
+	# Register this player in our tracking dictionary
+	players_in_contact[body] = 0.0  # Initialize with 0 so first damage is immediate
+	
+	# Deal immediate damage on contact
+	attempt_damage_player(body)
+
+func _on_player_exited_damage_zone(body: Node2D) -> void:
+	"""Player left damage area - stop tracking them"""
+	if body in players_in_contact:
+		players_in_contact.erase(body)
+
+func process_continuous_damage() -> void:
+	"""Process damage for all players currently in contact (called every frame)"""
+	if is_dead or is_hit_stunned:
 		return
 	
-	last_damage_time = current_time
+	var current_time := Time.get_ticks_msec() / 1000.0
 	
-	if player_body.has_method("take_damage"):
-		player_body.take_damage(damage_to_deal)
-	
-	apply_knockback_to_player(player_body)
+	# Check each player in contact
+	for body in players_in_contact.keys():
+		if not is_instance_valid(body):
+			players_in_contact.erase(body)
+			continue
+		
+		var last_damage_time: float = players_in_contact[body]
+		
+		# Check if cooldown has passed
+		if current_time - last_damage_time >= DAMAGE_COOLDOWN:
+			attempt_damage_player(body)
 
-func apply_knockback_to_player(player_body):
-	# Calculate horizontal knockback direction
-	var knockback_dir_x = sign(player_body.global_position.x - global_position.x)
+func attempt_damage_player(body: Node) -> void:
+	"""Single unified function to deal damage to player"""
+	if is_dead or is_hit_stunned:
+		return
 	
-	# If player is exactly at center, use slime's facing direction
-	if knockback_dir_x == 0:
-		knockback_dir_x = dir.x
+	if not is_instance_valid(body):
+		return
 	
-	# Add upward component for knockback
-	var knockback_vector = Vector2(knockback_dir_x * KNOCKBACK_FORCE, -KNOCKBACK_FORCE * 0.5)
+	# Update last damage time
+	var current_time := Time.get_ticks_msec() / 1000.0
+	players_in_contact[body] = current_time
 	
-	if player_body.has_method("apply_knockback"):
-		player_body.apply_knockback(knockback_vector)
-	elif player_body is CharacterBody2D:
-		player_body.velocity = knockback_vector
+	# Enter hit stun
+	is_hit_stunned = true
+	velocity.x = 0
+	
+	# Deal damage
+	if body.has_method("take_damage"):
+		body.take_damage(damage)
+	
+	# Apply knockback to player
+	apply_knockback(body)
+	
+	# Push enemy back slightly to prevent stacking
+	if body is CharacterBody2D:
+		var push_dir: float = -sign(body.global_position.x - global_position.x)
+		if push_dir == 0:
+			push_dir = -direction.x
+		velocity.x = push_dir * SPEED * 0.5  # Half speed pushback
+	
+	# Exit hit stun after delay
+	await get_tree().create_timer(HIT_STUN_TIME).timeout
+	is_hit_stunned = false
 
-func _on_direction_timer_timeout():
-	if !is_chasing:
-		dir.x = 1 if randf() > 0.5 else -1
-		velocity.x = 0
+# ================= KNOCKBACK =================
+func apply_knockback(body: Node) -> void:
+	"""Apply knockback force to player"""
+	if not body is CharacterBody2D:
+		return
+	
+	var dir: float = sign(body.global_position.x - global_position.x)
+	if dir == 0:
+		dir = direction.x
+	
+	# Horizontal knockback only - no vertical component
+	var knock := Vector2(dir * KNOCKBACK_FORCE, 0)
+	
+	if body.has_method("apply_knockback"):
+		body.apply_knockback(knock)
+	else:
+		body.velocity.x = knock.x
 
-func take_damage(amount: int):
-	if dead:
+# ================= DAMAGE TAKEN =================
+func take_damage(amount: int) -> void:
+	"""Enemy takes damage"""
+	if is_dead:
 		return
 	
 	health -= amount
-	taking_damage = true
+	
+	if sprite:
+		sprite.play("hurt")
 	
 	if health <= 0:
-		dead = true
-		if anim_sprite:
-			anim_sprite.play("death")
-		await get_tree().create_timer(1.0).timeout
-		queue_free()
+		die()
 	else:
-		await get_tree().create_timer(0.8).timeout
-		taking_damage = false
+		await get_tree().create_timer(0.3).timeout
+		if sprite:
+			sprite.play("walk")
+
+# ================= DEATH =================
+func die() -> void:
+	"""Handle enemy death"""
+	is_dead = true
+	velocity = Vector2.ZERO
+	
+	if sprite:
+		sprite.play("death")
+	
+	# Disable collisions
+	set_collision_layer(0)
+	set_collision_mask(0)
+	
+	# Disable areas
+	if detection_area:
+		detection_area.monitoring = false
+	if damage_area:
+		damage_area.monitoring = false
+	
+	# Clear player tracking
+	players_in_contact.clear()
+	
+	# Remove after death animation
+	await get_tree().create_timer(DEATH_DURATION).timeout
+	queue_free()

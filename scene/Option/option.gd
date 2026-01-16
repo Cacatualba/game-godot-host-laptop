@@ -1,27 +1,24 @@
 extends Control
 
-var save_path = "user://variable.save"
+var save_path: String = "user://variable.save"
 
-func _ready():
+func _ready() -> void:
 	$quit1/quit2.grab_click_focus()
 
-
-func _on_quit_2_pressed():
+func _on_quit_2_pressed() -> void:
 	print("credits button work3")
 	get_tree().change_scene_to_file("res://scene/menu/menu.tscn")
 	print("credits button work4")
 
-
 func _on_button_1_pressed() -> void:
 	delete_save_data()
 
-func delete_save_data():
-	var save_path = "user://variable.save"
-	
+func delete_save_data() -> void:
+	# Use the class variable instead of redeclaring it
 	if FileAccess.file_exists(save_path):
-		var dir = DirAccess.open("user://")
+		var dir := DirAccess.open("user://")
 		if dir:
-			var error = dir.remove(save_path)
+			var error := dir.remove(save_path)
 			if error == OK:
 				print("✅ Save data deleted successfully!")
 			else:
