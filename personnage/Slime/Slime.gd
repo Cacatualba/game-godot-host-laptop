@@ -35,11 +35,13 @@ var player: CharacterBody2D
 func _ready() -> void:
 	add_to_group("enemies")
 	
-	# Play walk animation if sprite exists
+	# Set initial direction
+	direction = Vector2.RIGHT if randf() > 0.5 else Vector2.LEFT
+	
+	# Play walk animation and set initial sprite direction
 	if sprite:
 		sprite.play("walk")
-
-	direction = Vector2.RIGHT if randf() > 0.5 else Vector2.LEFT
+		update_sprite_direction()
 	
 	# Start direction timer if it exists
 	if dir_timer:
@@ -96,14 +98,25 @@ func _physics_process(delta: float) -> void:
 		velocity.x = direction.x * SPEED
 		check_edge()
 
-	# Update sprite direction
-	if sprite and velocity.x != 0:
-		sprite.flip_h = velocity.x < 0
+	# Update sprite direction based on movement
+	update_sprite_direction()
 	
 	# Process continuous damage for all players in contact
 	process_continuous_damage()
 	
 	move_and_slide()
+
+# ================= SPRITE DIRECTION =================
+func update_sprite_direction() -> void:
+	"""Update sprite facing direction based on movement direction"""
+	if not sprite:
+		return
+	
+	# Flip sprite based on direction (flip_h = true means facing LEFT)
+	if direction.x > 0:
+		sprite.flip_h = false  # Face RIGHT
+	elif direction.x < 0:
+		sprite.flip_h = true   # Face LEFT
 
 # ================= EDGE CHECK =================
 func check_edge() -> void:
@@ -240,15 +253,17 @@ func take_damage(amount: int) -> void:
 	
 	health -= amount
 	
-	if sprite:
+	# Play hurt animation
+	if sprite and sprite.sprite_frames.has_animation("hurt"):
 		sprite.play("hurt")
+		# Return to walk animation after hurt animation
+		await get_tree().create_timer(0.3).timeout
+		if sprite and not is_dead:
+			sprite.play("walk")
 	
+	# Check for death
 	if health <= 0:
 		die()
-	else:
-		await get_tree().create_timer(0.3).timeout
-		if sprite:
-			sprite.play("walk")
 
 # ================= DEATH =================
 func die() -> void:
@@ -256,8 +271,13 @@ func die() -> void:
 	is_dead = true
 	velocity = Vector2.ZERO
 	
+	# Play death animation if it exists
 	if sprite:
-		sprite.play("death")
+		if sprite.sprite_frames.has_animation("death"):
+			sprite.play("death")
+		else:
+			# Fallback visual effect if no death animation
+			sprite.modulate = Color(1, 0, 0, 0.5)  # Red tint
 	
 	# Disable collisions
 	set_collision_layer(0)
