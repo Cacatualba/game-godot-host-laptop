@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://bhpgwtkbl378e"]
+[gd_scene load_steps=16 format=3 uid="uid://bhpgwtkbl378e"]
 
 [ext_resource type="Script" uid="uid://bgb6wnwac4yyr" path="res://personnage/Main Character/mouvement/Player.gd" id="1_8lk8g"]
 [ext_resource type="Script" uid="uid://dlseenc1o0qbs" path="res://GameState.gd" id="1_v3g3p"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://drvlqq6hky5on" path="res://door 1/DoorTrigger.gd" id="4_56rhf"]
 [ext_resource type="Texture2D" uid="uid://de12c52qwrpw2" path="res://scene/scene 1/grounds/rouge.png" id="5_o0lrt"]
 [ext_resource type="PackedScene" uid="uid://d2h32ogy2urip" path="res://personnage/Slime/Slime.tscn" id="6_0h8es"]
+[ext_resource type="AudioStream" uid="uid://bbjo58tx12k1t" path="res://musique/musique_jeux_de_lautre_blud 1.mp3" id="8_jhmwm"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_d4yfj"]
 radius = 41.0
@@ -130,3 +131,6 @@ shape = SubResource("RectangleShape2D_vso1m")
 
 [node name="Slime" parent="." instance=ExtResource("6_0h8es")]
 position = Vector2(3745, 2125)
+
+[node name="AudioStreamPlayer1" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("8_jhmwm")

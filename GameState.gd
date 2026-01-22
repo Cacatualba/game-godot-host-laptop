@@ -21,6 +21,13 @@ func _ready():
 	load_data()
 	spawn_enemies_at_default_positions()
 	setup_entities()
+	
+func _process(_delta):
+	if $AudioStreamPlayer1.playing == false:
+		$AudioStreamPlayer1.play()
+		
+	
+pass
 
 func spawn_enemies_at_default_positions():
 	print("=== SPAWNING ENEMIES ===")

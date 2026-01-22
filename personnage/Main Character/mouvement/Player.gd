@@ -4,9 +4,10 @@ class_name Player
 # Movement Constants
 @export_group("Movement")
 @export var speed: float = 400.0
-@export var acceleration: float = 2000.0
-@export var friction: float = 1500.0
-@export var air_resistance: float = 200.0
+@export var acceleration: float = 4000.0  # Doubled for snappier ground movement
+@export var friction: float = 3000.0  # Doubled to stop faster
+@export var air_acceleration: float = 3000.0  # Separate value for air control
+@export var air_friction: float = 400.0  # Better air control when no input
 
 # Jump Constants
 @export_group("Jump")
@@ -101,11 +102,11 @@ func handle_movement_input(delta: float) -> void:
 	if direction != 0:
 		# Accelerate towards target speed
 		var target_speed: float = direction * speed
-		var accel: float = acceleration if is_on_floor() else air_resistance
+		var accel: float = acceleration if is_on_floor() else air_acceleration
 		velocity.x = move_toward(velocity.x, target_speed, accel * delta)
 	else:
 		# Apply friction when no input
-		var friction_value: float = friction if is_on_floor() else air_resistance
+		var friction_value: float = friction if is_on_floor() else air_friction
 		velocity.x = move_toward(velocity.x, 0, friction_value * delta)
 
 func apply_smooth_gravity(delta: float) -> void:
