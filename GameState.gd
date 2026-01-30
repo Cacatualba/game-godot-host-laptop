@@ -12,9 +12,9 @@ var saved_data := {
 
 # Positions de spawn par défaut des ennemis
 const ENEMY_DEFAULT_SPAWNS = {
-	"Slime": Vector2( 5931.0, 1828.0),
+	"Slime": Vector2( 5566.0, 1827.0),
 	"Slime2": Vector2(2446.0, 2636.0),
-	"Slime3": Vector2(5965.0, 2032.0),
+	"Slime3": Vector2(6127.0, 1834.0),
 }
 
 func _ready():
