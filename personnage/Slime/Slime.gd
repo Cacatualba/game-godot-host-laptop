@@ -5,12 +5,14 @@ class_name Ennemy1
 const SPEED := 100.0
 const GRAVITY := 300.0
 const KNOCKBACK_FORCE := 300.0
-const EDGE_CHECK_DISTANCE := 20.0
+const EDGE_CHECK_DISTANCE := 25.0
 const EDGE_CHECK_DROP := 30.0
 
 const HIT_STUN_TIME := 0.2
 const DAMAGE_COOLDOWN := 1.0
 const DEATH_DURATION := 1.0
+const EDGE_CHECK_COOLDOWN := 0.1
+const DIRECTION_CHANGE_COOLDOWN := 0.5
 
 # ================= STATE =================
 @export var health := 80
@@ -19,10 +21,16 @@ const DEATH_DURATION := 1.0
 var is_dead := false
 var is_chasing := false
 var is_hit_stunned := false
-var direction := Vector2.RIGHT
+var direction := 1.0
+var last_edge_check_time := 0.0
+var last_direction_change_time := 0.0
+
+# DEBUG
+var debug_frame_count := 0
+var last_debug_time := 0.0
 
 # Track which players are currently in contact (for continuous damage)
-var players_in_contact: Dictionary = {}  # player -> last_damage_time
+var players_in_contact: Dictionary = {}
 
 # ================= REFERENCES =================
 var player: CharacterBody2D
@@ -36,7 +44,10 @@ func _ready() -> void:
 	add_to_group("enemies")
 	
 	# Set initial direction
-	direction = Vector2.RIGHT if randf() > 0.5 else Vector2.LEFT
+	direction = 1.0 if randf() > 0.5 else -1.0
+	print("=== ENEMY SPAWNED: ", name, " ===")
+	print("  Initial direction: ", direction)
+	print("  Position: ", global_position)
 	
 	# Play walk animation and set initial sprite direction
 	if sprite:
@@ -45,14 +56,14 @@ func _ready() -> void:
 	
 	# Start direction timer if it exists
 	if dir_timer:
+		dir_timer.wait_time = 10.0
 		dir_timer.start()
-		# Connect timer signal only if not already connected
 		if not dir_timer.timeout.is_connected(_on_direction_timer_timeout):
 			dir_timer.timeout.connect(_on_direction_timer_timeout)
 	else:
 		push_warning("Ennemy1: No direction timer found. Random direction changes disabled.")
 
-	# Connect signals only if nodes exist and not already connected
+	# Connect signals
 	if detection_area:
 		if not detection_area.body_entered.is_connected(_on_player_detected):
 			detection_area.body_entered.connect(_on_player_detected)
@@ -72,6 +83,7 @@ func _ready() -> void:
 # ================= PHYSICS =================
 func _physics_process(delta: float) -> void:
 	rotation = 0
+	debug_frame_count += 1
 
 	# Apply gravity
 	if not is_on_floor():
@@ -89,14 +101,73 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
+	# Get current time
+	var current_time := Time.get_ticks_msec() / 1000.0
+	var should_check_edge := (current_time - last_edge_check_time) >= EDGE_CHECK_COOLDOWN
+	var can_change_direction := (current_time - last_direction_change_time) >= DIRECTION_CHANGE_COOLDOWN
+
+	# DEBUG: Print every 2 seconds
+	if current_time - last_debug_time >= 2.0:
+		print("\n=== DEBUG [", name, "] Frame: ", debug_frame_count, " ===")
+		print("  🧭 direction: ", direction)
+		print("  🏃 velocity: ", velocity)
+		print("  📍 position: ", global_position)
+		print("  🟢 is_on_floor: ", is_on_floor())
+		print("  👤 is_chasing: ", is_chasing)
+		print("  😵 is_hit_stunned: ", is_hit_stunned)
+		print("  ⏱️ should_check_edge: ", should_check_edge)
+		print("  🔄 can_change_direction: ", can_change_direction)
+		print("  ⏰ last_direction_change: ", current_time - last_direction_change_time, "s ago")
+		
+		# Check edges in both directions
+		var left_edge = is_edge_ahead(-1.0)
+		var right_edge = is_edge_ahead(1.0)
+		print("  ⬅️ LEFT edge detected: ", left_edge)
+		print("  ➡️ RIGHT edge detected: ", right_edge)
+		
+		last_debug_time = current_time
+
+	# Store old direction for comparison
+	var old_direction = direction
+
 	# Movement logic
 	if is_chasing and is_instance_valid(player):
+		print("  [CHASE MODE]")
 		var dir: float = sign(player.global_position.x - global_position.x)
-		velocity.x = dir * SPEED
-		direction.x = dir
+		
+		# Check for edge before moving while chasing
+		if should_check_edge and is_edge_ahead(dir):
+			last_edge_check_time = current_time
+			velocity.x = 0
+			print("  ❌ CHASE BLOCKED by edge at dir: ", dir)
+			# Stop chasing if player is across a gap
+			if abs(player.global_position.x - global_position.x) > EDGE_CHECK_DISTANCE * 3:
+				is_chasing = false
+				player = null
+				print("  👋 Stopped chasing - player too far")
+		else:
+			velocity.x = dir * SPEED
+			direction = dir
+			print("  ✅ CHASE velocity set: ", velocity.x)
 	else:
-		velocity.x = direction.x * SPEED
-		check_edge()
+		# Patrol mode - only check edges when on floor
+		print("  [PATROL MODE]")
+		
+		# Set velocity first
+		velocity.x = direction * SPEED
+		print("    ➡️ Setting velocity.x = ", direction, " * ", SPEED, " = ", velocity.x)
+		
+		# Only check for edges/walls when on the floor and able to change direction
+		if is_on_floor() and should_check_edge and can_change_direction:
+			var edge_detected = is_edge_ahead(direction)
+			print("    🔍 Checking edge in direction ", direction, ": ", edge_detected)
+			
+			if edge_detected:
+				last_edge_check_time = current_time
+				last_direction_change_time = current_time
+				direction = -direction
+				velocity.x = direction * SPEED
+				print("    🔄 DIRECTION CHANGED from ", old_direction, " to ", direction)
 
 	# Update sprite direction based on movement
 	update_sprite_direction()
@@ -104,7 +175,24 @@ func _physics_process(delta: float) -> void:
 	# Process continuous damage for all players in contact
 	process_continuous_damage()
 	
+	# Store velocity before move_and_slide
+	var velocity_before = velocity.x
+	
 	move_and_slide()
+	
+	# Check if we hit a wall (velocity was stopped by collision)
+	if is_on_floor() and abs(velocity_before) > 0.1 and abs(velocity.x) < 0.1:
+		var current_time_now := Time.get_ticks_msec() / 1000.0
+		if (current_time_now - last_direction_change_time) >= DIRECTION_CHANGE_COOLDOWN:
+			print("  🧱 HIT WALL! Changing direction from ", direction, " to ", -direction)
+			last_direction_change_time = current_time_now
+			direction = -direction
+	
+	# Check if velocity changed after move_and_slide
+	if abs(velocity.x - velocity_before) > 0.1:
+		print("  ⚠️ Velocity changed by move_and_slide!")
+		print("    Before: ", velocity_before)
+		print("    After: ", velocity.x)
 
 # ================= SPRITE DIRECTION =================
 func update_sprite_direction() -> void:
@@ -112,41 +200,56 @@ func update_sprite_direction() -> void:
 	if not sprite:
 		return
 	
-	# Flip sprite based on direction (flip_h = true means facing LEFT)
-	if direction.x > 0:
+	if direction > 0:
 		sprite.flip_h = false  # Face RIGHT
-	elif direction.x < 0:
+	elif direction < 0:
 		sprite.flip_h = true   # Face LEFT
 
 # ================= EDGE CHECK =================
-func check_edge() -> void:
+func is_edge_ahead(dir: float) -> bool:
+	"""Check if there's an edge in the given direction. Returns true if edge detected."""
 	if not is_on_floor():
-		return
-
+		return false
+	
 	var space := get_world_2d().direct_space_state
-	var start := global_position + Vector2(direction.x * EDGE_CHECK_DISTANCE, 0)
+	var start := global_position + Vector2(dir * EDGE_CHECK_DISTANCE, 10)
 	var end := start + Vector2(0, EDGE_CHECK_DROP)
-
+	
 	var query := PhysicsRayQueryParameters2D.create(start, end)
 	query.exclude = [self]
 	query.collision_mask = 1
+	
+	# If raycast hits nothing, there's an edge
+	var result = space.intersect_ray(query)
+	return result.is_empty()
 
-	if space.intersect_ray(query).is_empty():
+func check_edge() -> void:
+	"""Legacy edge check function"""
+	var current_time := Time.get_ticks_msec() / 1000.0
+	if (current_time - last_edge_check_time) < EDGE_CHECK_COOLDOWN:
+		return
+	
+	if (current_time - last_direction_change_time) < DIRECTION_CHANGE_COOLDOWN:
+		return
+	
+	if is_edge_ahead(direction):
+		last_edge_check_time = current_time
+		last_direction_change_time = current_time
 		direction = -direction
-		velocity.x = 0
 
 # ================= DETECTION =================
 func _on_player_detected(body: Node2D) -> void:
 	if body.is_in_group("player"):
 		player = body
 		is_chasing = true
+		print("  🎯 Player detected! Starting chase.")
 
 func _on_player_lost(body: Node2D) -> void:
 	if body == player:
 		is_chasing = false
 		player = null
+		print("  👋 Player lost! Returning to patrol.")
 
-# Backward compatibility for scene connections
 func _on_detection_area_body_entered(body: Node2D) -> void:
 	_on_player_detected(body)
 
@@ -155,33 +258,28 @@ func _on_detection_area_body_exited(body: Node2D) -> void:
 
 func _on_direction_timer_timeout() -> void:
 	if not is_chasing:
-		direction.x = 1.0 if randf() > 0.5 else -1.0
+		var old_dir = direction
+		direction = 1.0 if randf() > 0.5 else -1.0
+		print("  ⏰ Timer timeout! Direction changed from ", old_dir, " to ", direction)
 
 # ================= UNIFIED DAMAGE SYSTEM =================
 func _on_player_entered_damage_zone(body: Node2D) -> void:
-	"""Player entered damage area - register them and deal immediate damage"""
 	if not body.is_in_group("player") or is_dead or is_hit_stunned:
 		return
 	
-	# Register this player in our tracking dictionary
-	players_in_contact[body] = 0.0  # Initialize with 0 so first damage is immediate
-	
-	# Deal immediate damage on contact
+	players_in_contact[body] = 0.0
 	attempt_damage_player(body)
 
 func _on_player_exited_damage_zone(body: Node2D) -> void:
-	"""Player left damage area - stop tracking them"""
 	if body in players_in_contact:
 		players_in_contact.erase(body)
 
 func process_continuous_damage() -> void:
-	"""Process damage for all players currently in contact (called every frame)"""
 	if is_dead or is_hit_stunned:
 		return
 	
 	var current_time := Time.get_ticks_msec() / 1000.0
 	
-	# Check each player in contact
 	for body in players_in_contact.keys():
 		if not is_instance_valid(body):
 			players_in_contact.erase(body)
@@ -189,55 +287,45 @@ func process_continuous_damage() -> void:
 		
 		var last_damage_time: float = players_in_contact[body]
 		
-		# Check if cooldown has passed
 		if current_time - last_damage_time >= DAMAGE_COOLDOWN:
 			attempt_damage_player(body)
 
 func attempt_damage_player(body: Node) -> void:
-	"""Single unified function to deal damage to player"""
 	if is_dead or is_hit_stunned:
 		return
 	
 	if not is_instance_valid(body):
 		return
 	
-	# Update last damage time
 	var current_time := Time.get_ticks_msec() / 1000.0
 	players_in_contact[body] = current_time
 	
-	# Enter hit stun
 	is_hit_stunned = true
 	velocity.x = 0
 	
-	# Deal damage
 	if body.has_method("take_damage"):
 		body.take_damage(damage)
 	
-	# Apply knockback to player
 	apply_knockback(body)
 	
-	# Push enemy back slightly to prevent stacking
 	if body is CharacterBody2D:
 		var push_dir: float = -sign(body.global_position.x - global_position.x)
 		if push_dir == 0:
-			push_dir = -direction.x
-		velocity.x = push_dir * SPEED * 0.5  # Half speed pushback
+			push_dir = -direction
+		velocity.x = push_dir * SPEED * 0.5
 	
-	# Exit hit stun after delay
 	await get_tree().create_timer(HIT_STUN_TIME).timeout
 	is_hit_stunned = false
 
 # ================= KNOCKBACK =================
 func apply_knockback(body: Node) -> void:
-	"""Apply knockback force to player"""
 	if not body is CharacterBody2D:
 		return
 	
 	var dir: float = sign(body.global_position.x - global_position.x)
 	if dir == 0:
-		dir = direction.x
+		dir = direction
 	
-	# Horizontal knockback only - no vertical component
 	var knock := Vector2(dir * KNOCKBACK_FORCE, 0)
 	
 	if body.has_method("apply_knockback"):
@@ -247,51 +335,40 @@ func apply_knockback(body: Node) -> void:
 
 # ================= DAMAGE TAKEN =================
 func take_damage(amount: int) -> void:
-	"""Enemy takes damage"""
 	if is_dead:
 		return
 	
 	health -= amount
 	
-	# Play hurt animation
 	if sprite and sprite.sprite_frames.has_animation("hurt"):
 		sprite.play("hurt")
-		# Return to walk animation after hurt animation
 		await get_tree().create_timer(0.3).timeout
 		if sprite and not is_dead:
 			sprite.play("walk")
 	
-	# Check for death
 	if health <= 0:
 		die()
 
 # ================= DEATH =================
 func die() -> void:
-	"""Handle enemy death"""
 	is_dead = true
 	velocity = Vector2.ZERO
 	
-	# Play death animation if it exists
 	if sprite:
 		if sprite.sprite_frames.has_animation("death"):
 			sprite.play("death")
 		else:
-			# Fallback visual effect if no death animation
-			sprite.modulate = Color(1, 0, 0, 0.5)  # Red tint
+			sprite.modulate = Color(1, 0, 0, 0.5)
 	
-	# Disable collisions
 	set_collision_layer(0)
 	set_collision_mask(0)
 	
-	# Disable areas
 	if detection_area:
 		detection_area.monitoring = false
 	if damage_area:
 		damage_area.monitoring = false
 	
-	# Clear player tracking
 	players_in_contact.clear()
 	
-	# Remove after death animation
 	await get_tree().create_timer(DEATH_DURATION).timeout
 	queue_free()

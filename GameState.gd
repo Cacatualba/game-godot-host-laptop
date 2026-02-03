@@ -12,21 +12,20 @@ var saved_data := {
 
 # Positions de spawn par défaut des ennemis
 const ENEMY_DEFAULT_SPAWNS = {
-	"Slime": Vector2( 5566.0, 1827.0),
-	"Slime2": Vector2(2446.0, 2636.0),
-	"Slime3": Vector2(6127.0, 1834.0),
+	"Slime1": Vector2( 5566.0, 1827.0),
+	"Slime2": Vector2(1038.0, 2205.0),
+	"Slime3": Vector2(5566.0, 1827.0),
 }
 
 func _ready():
 	load_data()
 	spawn_enemies_at_default_positions()
 	setup_entities()
-	
+
 func _process(_delta):
 	if $AudioStreamPlayer1.playing == false:
 		$AudioStreamPlayer1.play()
-		
-	
+
 pass
 
 func spawn_enemies_at_default_positions():
@@ -78,6 +77,8 @@ func setup_entities():
 func _physics_process(_delta):
 	if Input.is_action_just_pressed("Option_In_Game") and player != null:
 		save_and_transition()
+	if Input.is_action_just_pressed("ui_select"):
+		$Saut.play()
 
 func save_and_transition():
 	save_all_positions()
